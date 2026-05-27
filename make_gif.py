@@ -1,0 +1,46 @@
+import os
+from PIL import Image
+
+def create_gif(output_gif_path, model_name, epoch_num, duration=200, loop=0,):
+    """
+    Создает анимированный GIF из изображений в указанной папке.
+
+    :param image_folder: Путь к папке с исходными изображениями.
+    :param output_gif_path: Путь для сохранения итогового GIF-файла.
+    :param duration: Длительность показа каждого кадра в миллисекундах (по умолчанию 200мс).
+    :param loop: Количество повторов анимации (0 - бесконечное повторение, 1 - один раз и т.д.).
+    """
+    frames = []
+    # Сортируем файлы для правильной последовательности кадров
+    images = []
+
+    for i in range(epoch_num):
+        images.append(os.path.join(os.path.curdir, f'mlartifacts/0/{model_name}/artifacts/epoch_{i+1}/result_0.png'))
+
+    for image_path in images:
+        try:
+            # Открываем изображение и конвертируем его в RGB (для совместимости)
+            new_frame = Image.open(image_path).convert('RGB')
+            frames.append(new_frame)
+        except Exception as e:
+            print(f"Ошибка при обработке изображения {image_path}: {e}")
+
+    if not frames:
+        print("Изображения для создания GIF не найдены.")
+        return
+
+    # Сохраняем первый кадр, а остальные добавляем как дополнительные кадры
+    frames[0].save(
+        output_gif_path,
+        format='GIF',
+        append_images=frames[1:],
+        save_all=True,
+        duration=duration,
+        loop=loop
+    )
+    print(f"GIF успешно создан и сохранен в {output_gif_path}")
+
+# Пример использования:
+# Предполагая, что ваши изображения находятся в папке 'frames_folder'
+
+create_gif('animation4.gif', model_name="6aa5b526263c44c99fe6a78b93654d2f", epoch_num=50, duration=300)
